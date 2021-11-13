@@ -16,6 +16,7 @@ const months = ["January", "February", "March", "April", "May", "June", "July", 
 // API credentials
 const url = "https://api.openweathermap.org/data/2.5/weather?zip=";
 const key = "e8ab5a6e4726e99a00185eb1046000aa";
+const directive = "&units=metric"; // To control the temperature format (celsius)
 
 // Create a new date instance dynamically with JS
 const d = new Date();
@@ -26,7 +27,7 @@ const newDate = `${d.getDate()}/${d.getMonth() + 1}/${d.getFullYear()} - ${d.get
 // Get the weather info from the API
 const fetchWeather = async () => {
   const zipCode = zip.value;
-  const completeUrl = `${url}${zipCode}&appid=${key}`;
+  const completeUrl = `${url}${zipCode}&appid=${key}${directive}`;
   const weather = await fetch(completeUrl);
   if (!weather.ok) {
     throw "The API does not support the provided zip code!";
@@ -71,7 +72,7 @@ const storeData = async (url = '', data = {}) => {
 // Updates the latest entries using the received JSON 
 function updateEntries(data) {
   feelingsInput.value = ''; // Clear the zip input
-  temperature.innerHTML = `Temperature: ${convertTemp(data.temperature)}`;
+  temperature.innerHTML = `Temperature: ${(data.temperature).toFixed(2)} C°`;
   date.innerHTML = `Date: ${convertDateFormat(d)}`;
   feelingsArea.innerHTML = `Last feelings entry: ${data.feelings}`;
 }
@@ -82,13 +83,6 @@ const convertDateFormat = (d) => {
   const day = days[d.getDay()];
   const time = `${(d.getHours())%12 == 0? 12:(d.getHours())%12}:${d.getMinutes()}:${d.getSeconds()} ${d.getHours() > 11? "PM":"AM"}`;
   return `${day}, ${month} ${d.getDate()}, ${d.getFullYear()}  ${time}`;
-}
-
-// Convert the temperature from kelvin to celsius and fahrenheit
-const convertTemp = (temperature) => {
-  const celsius = (temperature - 273.15).toFixed(2);
-  const fahrenheit = celsius * (9 / 5) + 32;
-  return `${celsius} C° / ${fahrenheit} F°`;
 }
 
 // Event listener to get the required data when the button is clicked
