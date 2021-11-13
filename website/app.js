@@ -10,13 +10,17 @@ const date = document.querySelector("#date");
 const feelingsArea = document.querySelector("#content");
 const errorContainer = document.querySelector("#invalidZipcode");
 
+const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+
 // API credentials
 const url = "https://api.openweathermap.org/data/2.5/weather?zip=";
 const key = "e8ab5a6e4726e99a00185eb1046000aa";
 
 // Create a new date instance dynamically with JS
-let d = new Date();
-let newDate = `${d.getDate()}/${d.getMonth()}/${d.getFullYear()} - ${d.getHours()}:${d.getMinutes()}:${d.getSeconds()}`;
+const d = new Date();
+// getMonth() returns the index of the month (from 0 to 11), therefore 1 should be added to get the correct value
+const newDate = `${d.getDate()}/${d.getMonth() + 1}/${d.getFullYear()} - ${d.getHours()}:${d.getMinutes()}:${d.getSeconds()}`;
 
 // Functions
 // Get the weather info from the API
@@ -35,7 +39,7 @@ const fetchWeather = async () => {
 
 const handleUserInput = async () => {
   const feelings = feelingsInput.value;
-  const temperature = await fetchWeather().then(value => value.main.temp).catch(err => errorContainer.innerHTML = "Error: " + err );
+  const temperature = await fetchWeather().then(value => value.main.temp).catch(err => errorContainer.innerHTML = "Error: " + err);
   const data = {
     feelings: feelings,
     temperature: temperature,
@@ -67,9 +71,24 @@ const storeData = async (url = '', data = {}) => {
 // Updates the latest entries using the received JSON 
 function updateEntries(data) {
   feelingsInput.value = ''; // Clear the zip input
-  temperature.innerHTML = `Temperature: ${(data.temperature - 273.15).toFixed(2)} C°`;
-  date.innerHTML = `Date: ${data.date}`;
+  temperature.innerHTML = `Temperature: ${convertTemp(data.temperature)}`;
+  date.innerHTML = `Date: ${convertDateFormat(d)}`;
   feelingsArea.innerHTML = `Last feelings entry: ${data.feelings}`;
+}
+
+// Converts the date format
+const convertDateFormat = (d) => {
+  const month = months[d.getMonth()];
+  const day = days[d.getDay()];
+  const time = `${(d.getHours())%12 == 0? 12:(d.getHours())%12}:${d.getMinutes()}:${d.getSeconds()} ${d.getHours() > 11? "PM":"AM"}`;
+  return `${day}, ${month} ${d.getDate()}, ${d.getFullYear()}  ${time}`;
+}
+
+// Convert the temperature from kelvin to celsius and fahrenheit
+const convertTemp = (temperature) => {
+  const celsius = (temperature - 273.15).toFixed(2);
+  const fahrenheit = celsius * (9 / 5) + 32;
+  return `${celsius} C° / ${fahrenheit} F°`;
 }
 
 // Event listener to get the required data when the button is clicked
